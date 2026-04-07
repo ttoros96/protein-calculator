@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 
 export default function ProteinCalculatorWebsite() {
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
-  const [weight, setWeight] = useState(80);
-  const [meals, setMeals] = useState(4);
-  const [bodyFat, setBodyFat] = useState(25);
+  const [weight, setWeight] = useState<string>("80");
+  const [meals, setMeals] = useState<string>("4");
+  const [bodyFat, setBodyFat] = useState<string>("25");
 
   const leanMass = useMemo(() => {
     const parsedWeight = Number(weight);
@@ -42,7 +42,7 @@ export default function ProteinCalculatorWebsite() {
 
   const selectBodyFat = (label: string) => {
     const firstNumber = parseInt(label.match(/\d+/)?.[0] || "0", 10);
-    if (firstNumber > 0) setBodyFat(firstNumber);
+    if (firstNumber > 0) setBodyFat(String(firstNumber));
   };
 
   return (
@@ -77,7 +77,7 @@ export default function ProteinCalculatorWebsite() {
                         type="number"
                         min="1"
                         value={weight}
-                        onChange={(e) => setWeight(Number(e.target.value))}
+                        onChange={(e) => setWeight(e.target.value)}
                         className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
                         placeholder="Enter your weight"
                       />
@@ -112,7 +112,7 @@ export default function ProteinCalculatorWebsite() {
                       min="0"
                       max="99"
                       value={bodyFat}
-                      onChange={(e) => setBodyFat(Number(e.target.value))}
+                      onChange={(e) => setBodyFat(e.target.value)}
                       className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
                       placeholder="Enter your body fat %"
                     />
@@ -125,7 +125,7 @@ export default function ProteinCalculatorWebsite() {
                       min="1"
                       max="8"
                       value={meals}
-                      onChange={(e) => setMeals(Number(e.target.value))}
+                      onChange={(e) => setMeals(e.target.value)}
                       className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
                     />
                   </div>
@@ -166,7 +166,7 @@ export default function ProteinCalculatorWebsite() {
                 <div className="rounded-[1.75rem] border border-white/10 bg-[#111113] p-3 sm:p-4">
                   <div className="grid grid-cols-2 gap-3">
                     {bodyFatGuide.map((item) => {
-                      const isSelected = bodyFat >= parseInt(item.label) && bodyFat < parseInt(item.label) + 5;
+                      const isSelected = Number(bodyFat) >= parseInt(item.label) && Number(bodyFat) < parseInt(item.label) + 5;
 
                       return (
                         <button
@@ -179,18 +179,11 @@ export default function ProteinCalculatorWebsite() {
                               : "border-white/10 hover:border-white/25"
                           }`}
                         >
-                          <div className="flex h-40 items-center justify-center bg-[#3a3a3c] p-3 text-center sm:h-44">
-                            <div className="flex flex-col items-center justify-center gap-3">
-                              <div className="w-full h-full flex items-center justify-center">
-                                <img src={item.image} alt={item.label} className="h-full w-full object-contain" />
-                              </div>
-                              <span className="text-xs uppercase tracking-[0.18em] text-[#aeaeb2]">
-                                Reference
-                              </span>
-                            </div>
+                          <div className="flex items-center justify-center bg-[#3a3a3c] p-3 text-center">
+                            <img src={item.image} alt={item.label} className="w-full object-contain" />
                           </div>
-                          <div className="border-t border-white/10 px-3 py-3 text-white sm:px-4">
-                            <p className="text-base font-bold text-white sm:text-lg">{item.label}</p>
+                          <div className="border-t border-white/10 px-3 py-3 sm:px-4">
+                            <p className="text-base font-bold text-[#ff9f0a] sm:text-lg">{item.label}</p>
                             <p className="mt-1 text-xs text-[#aeaeb2] sm:text-sm">{item.note}</p>
                           </div>
                         </button>
