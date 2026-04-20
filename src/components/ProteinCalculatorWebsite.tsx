@@ -4,13 +4,16 @@ import { useMemo, useState } from "react";
 
 export default function ProteinCalculatorWebsite() {
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
-  const [weight, setWeight] = useState<string>("80");
-  const [meals, setMeals] = useState<string>("4");
-  const [bodyFat, setBodyFat] = useState<string>("25");
+  const [weight, setWeight] = useState<number | "">("");
+  const [meals, setMeals] = useState<number | "">("");
+  const [age, setAge] = useState<number | "">("");
+  const [height, setHeight] = useState<string>("");
+  const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
+  const [bodyFat, setBodyFat] = useState<number | "">("");
 
   const leanMass = useMemo(() => {
-    const parsedWeight = Number(weight);
-    const parsedBodyFat = Number(bodyFat);
+    const parsedWeight = Number(weight || 0);
+    const parsedBodyFat = Number(bodyFat || 0);
     if (!parsedWeight || parsedWeight <= 0) return 0;
     if (parsedBodyFat < 0 || parsedBodyFat >= 100) return parsedWeight;
     return Math.round(parsedWeight * (1 - parsedBodyFat / 100));
@@ -23,7 +26,7 @@ export default function ProteinCalculatorWebsite() {
   }, [leanMass, unit]);
 
   const proteinPerMeal = useMemo(() => {
-    const parsedMeals = Number(meals);
+    const parsedMeals = Number(meals || 0);
     if (!parsedMeals || parsedMeals <= 0) return 0;
     return Math.round(dailyProtein / parsedMeals);
   }, [dailyProtein, meals]);
@@ -42,7 +45,7 @@ export default function ProteinCalculatorWebsite() {
 
   const selectBodyFat = (label: string) => {
     const firstNumber = parseInt(label.match(/\d+/)?.[0] || "0", 10);
-    if (firstNumber > 0) setBodyFat(String(firstNumber));
+    if (firstNumber > 0) setBodyFat(firstNumber);
   };
 
   return (
@@ -51,13 +54,13 @@ export default function ProteinCalculatorWebsite() {
         <div className="space-y-4 sm:space-y-6">
           <div className="space-y-3 text-center sm:text-left">
             <div className="inline-flex items-center rounded-full border border-white/10 bg-[#2c2c2e] px-3 py-1 text-xs font-medium text-[#ff9f0a] shadow-sm sm:text-sm">
-              Free Daily Protein Calculator
+              Simple Daily Protein Calculator
             </div>
             <h1 className="text-2xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
               Calculate your daily protein target.
             </h1>
             <p className="mx-auto max-w-2xl text-sm leading-6 text-[#8e8e93] sm:mx-0 sm:text-base sm:leading-7">
-              Enter your weight, estimate your body fat, and get a lean-mass-based protein target in seconds.
+              Enter your weight, estimate your body fat via reference photos, and get a lean-mass-based protein target in seconds.
             </p>
           </div>
 
@@ -77,7 +80,7 @@ export default function ProteinCalculatorWebsite() {
                         type="number"
                         min="1"
                         value={weight}
-                        onChange={(e) => setWeight(e.target.value)}
+                        onChange={(e) => setWeight(e.target.value === "" ? "" : Number(e.target.value))}
                         className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
                         placeholder="Enter your weight"
                       />
@@ -112,10 +115,80 @@ export default function ProteinCalculatorWebsite() {
                       min="0"
                       max="99"
                       value={bodyFat}
-                      onChange={(e) => setBodyFat(e.target.value)}
+                      onChange={(e) => setBodyFat(e.target.value === "" ? "" : Number(e.target.value))}
                       className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
                       placeholder="Enter your body fat %"
                     />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-white">Age</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="120"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value === "" ? "" : Number(e.target.value))}
+                      className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
+                      placeholder="Enter your age"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-white">Height</label>
+
+                    <div className="grid grid-cols-[1fr_92px] gap-2">
+                      <input
+                        type="text"
+                        inputMode={heightUnit === "cm" ? "numeric" : "text"}
+                        value={height}
+                        onChange={(e) => {
+                          let value = e.target.value;
+
+                          if (heightUnit === "cm") {
+                            const digitsOnly = value.replace(/[^0-9]/g, "");
+                            setHeight(digitsOnly);
+                            return;
+                          }
+
+                          // Handle deletion smoothly
+                          if (value.endsWith("'")) {
+                            const digits = value.replace(/[^0-9]/g, "");
+                            if (digits.length === 0) {
+                              setHeight("");
+                              return;
+                            }
+                            setHeight(`${digits}'`);
+                            return;
+                          }
+
+                          const digits = value.replace(/[^0-9]/g, "");
+
+                          if (digits.length === 0) {
+                            setHeight("");
+                          } else if (digits.length === 1) {
+                            setHeight(`${digits}'`);
+                          } else {
+                            setHeight(`${digits.charAt(0)}'${digits.slice(1, 3)}`);
+                          }
+                        }}
+                        className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
+                        placeholder="Enter your height"
+                        maxLength={heightUnit === "cm" ? 3 : 4}
+                      />
+                      <select
+                        value={heightUnit}
+                        onChange={(e) => {
+                          const nextUnit = e.target.value as "cm" | "ft";
+                          setHeightUnit(nextUnit);
+                          setHeight("");
+                        }}
+                        className="rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
+                      >
+                        <option value="cm">cm</option>
+                        <option value="ft">ft/in</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div>
@@ -125,8 +198,9 @@ export default function ProteinCalculatorWebsite() {
                       min="1"
                       max="8"
                       value={meals}
-                      onChange={(e) => setMeals(e.target.value)}
+                      onChange={(e) => setMeals(e.target.value === "" ? "" : Number(e.target.value))}
                       className="w-full rounded-[1.25rem] border border-white/10 bg-[#2c2c2e] px-4 py-3 text-base text-white outline-none transition placeholder:text-[#8e8e93] focus:border-[#ff9f0a] focus:ring-2 focus:ring-[#ff9f0a]/20"
+                      placeholder="Enter meals per day"
                     />
                   </div>
                 </div>
@@ -166,7 +240,8 @@ export default function ProteinCalculatorWebsite() {
                 <div className="rounded-[1.75rem] border border-white/10 bg-[#111113] p-3 sm:p-4">
                   <div className="grid grid-cols-2 gap-3">
                     {bodyFatGuide.map((item) => {
-                      const isSelected = Number(bodyFat) >= parseInt(item.label) && Number(bodyFat) < parseInt(item.label) + 5;
+                      const bf = Number(bodyFat || 0);
+                      const isSelected = bf >= parseInt(item.label) && bf < parseInt(item.label) + 5;
 
                       return (
                         <button
